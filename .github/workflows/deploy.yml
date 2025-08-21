@@ -15,7 +15,7 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git remote add hf https://huggingface.co/spaces/yudarahma/sisfocloud
+          git remote add hf https://yudarahma:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/yudarahma/sisfocloud
           git push -f hf main
         # env:
           # Tambahkan token jika repo private atau butuh auth
