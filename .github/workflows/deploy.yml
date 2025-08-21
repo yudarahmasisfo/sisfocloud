@@ -17,6 +17,6 @@ jobs:
           git config --global user.name "GitHub Action"
           git remote add hf https://huggingface.co/spaces/yudarahma/sisfocloud
           git push -f hf main
-        env:
+        # env:
           # Tambahkan token jika repo private atau butuh auth
           # Tapi untuk public Space, biasanya tidak perlu
