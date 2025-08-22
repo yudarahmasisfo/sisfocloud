@@ -1,22 +1,22 @@
-name: Deploy to Hugging Face Spaces
+name: 🚀 Deploy ke Hugging Face
 
 on:
   push:
-    branches: [ main ]  # atau master
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: 🔎 Checkout kode (non-shallow)
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ambil seluruh history, penting!
 
-      - name: Push to Hugging Face
+      - name: 🔁 Push ke Hugging Face
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
+
           git remote add hf https://yudarahma:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/yudarahma/sisfocloud
           git push -f hf main
-        # env:
-          # Tambahkan token jika repo private atau butuh auth
-          # Tapi untuk public Space, biasanya tidak perlu
