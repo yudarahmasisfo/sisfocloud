@@ -1,12 +1,14 @@
-# 🌐 Web Saya di Hugging Face
-
-Website statis ini di-host di [Hugging Face Spaces](https://huggingface.co/spaces) menggunakan Docker.
-
-🔧 Auto-deploy dari GitHub → Hugging Face  
-🚀 Akses publik: `https://username-space-name.hf.space`
-
 ---
+title: SisfoCloud
+emoji: 🌐
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+# SisfoCloud
 
-## 🛠 Cara Deploy Manual
-```bash
-./deploy.sh
+Website ini di-host menggunakan Docker di Hugging Face Spaces.
+
+Dibuat dengan ❤️ oleh yudarahma.
