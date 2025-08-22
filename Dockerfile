@@ -9,14 +9,21 @@ RUN apt-get update && \
     apt-get install -y nginx && \
     rm -rf /var/lib/apt/lists/*
 
-# Buat direktori sementara yang bisa ditulis oleh user biasa
-RUN mkdir -p /tmp/nginx/logs /tmp/nginx/client-body /tmp/nginx/proxy
+# Buat direktori sementara di /tmp — lengkap untuk semua fitur nginx
+RUN mkdir -p \
+    /tmp/nginx/logs \
+    /tmp/nginx/client-body \
+    /tmp/nginx/proxy \
+    /tmp/nginx/fastcgi \
+    /tmp/nginx/scgi \
+    /tmp/nginx/uwsgi
 
 # Salin file website kamu
 COPY . /app
 
-# Konfigurasi nginx — semua path ke /tmp
+# Konfigurasi nginx — semua path diarahkan ke /tmp
 RUN echo " \
+# Log ke /tmp, bukan /var/log
 error_log /tmp/nginx/logs/error.log; \
 \
 events { \
@@ -29,9 +36,12 @@ http { \
     sendfile on; \
     keepalive_timeout 65; \
 \
-    # Tentukan tempat untuk proxy, client body, dll
-    proxy_temp_path /tmp/nginx/proxy; \
+    # Semua temporary paths diarahkan ke /tmp
     client_body_temp_path /tmp/nginx/client-body; \
+    proxy_temp_path      /tmp/nginx/proxy; \
+    fastcgi_temp_path    /tmp/nginx/fastcgi; \
+    scgi_temp_path       /tmp/nginx/scgi; \
+    uwsgi_temp_path      /tmp/nginx/uwsgi; \
 \
     server { \
         listen 7860; \
