@@ -1,28 +1,48 @@
-# Base: Ubuntu + nginx
+# Gunakan Ubuntu
 FROM ubuntu:22.04
 
+# Non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install nginx
+# Update & install nginx
 RUN apt-get update && \
     apt-get install -y nginx && \
     rm -rf /var/lib/apt/lists/*
 
-# Salin semua file ke web root
-COPY . /var/www/html/
+# Buat direktori yang bisa ditulis oleh user biasa
+RUN mkdir -p /tmp/nginx/logs /tmp/nginx/client-body
 
-# Konfigurasi nginx listen di port 7860
+# Salin file website
+COPY . /app/
+
+# Setup konfigurasi nginx
+RUN echo "error_log /tmp/nginx/logs/error.log; \
+access_log /tmp/nginx/logs/access.log; \
+\
+events { \
+    worker_connections 1024; \
+} \
+\
+http { \
+    include /etc/nginx/mime.types; \
+    default_type application/octet-stream; \
+    sendfile on; \
+    keepalive_timeout 65; \
+\
+    server { \
+        listen 7860; \
+        location / { \
+            root /app; \
+            index index.html; \
+            try_files \$uri \$uri/ =404; \
+        } \
+        # Temporary files \
+        client_body_temp_path /tmp/nginx/client-body; \
+    } \
+}" > /etc/nginx/nginx.conf
+
+# Ekspor port
 EXPOSE 7860
 
-RUN echo "server { \
-    listen 7860; \
-    server_name localhost; \
-    location / { \
-        root /var/www/html; \
-        index index.html; \
-        try_files \$uri \$uri/ =404; \
-    } \
-}" > /etc/nginx/sites-available/default
-
-# Jalankan nginx
+# Jalankan nginx sebagai user biasa
 CMD ["nginx", "-g", "daemon off;"]
