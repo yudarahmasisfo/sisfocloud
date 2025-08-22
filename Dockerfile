@@ -1,7 +1,6 @@
 # Base image
 FROM ubuntu:22.04
 
-# Non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install nginx
@@ -9,13 +8,14 @@ RUN apt-get update && \
     apt-get install -y nginx && \
     rm -rf /var/lib/apt/lists/*
 
-# Buat direktori sementara yang bisa ditulis oleh user biasa
-RUN mkdir -p /tmp/nginx/logs /tmp/nginx/client-body /tmp/nginx/proxy /tmp/nginx/run
+# Buat direktori sementara untuk semua kebutuhan nginx
+RUN mkdir -p /tmp/nginx/logs /tmp/nginx/client-body /tmp/nginx/proxy \
+    /tmp/nginx/run /tmp/nginx/fastcgi /tmp/nginx/uwsgi /tmp/nginx/scgi
 
-# Salin file website
-COPY . /app
+# Copy website
+COPY app /app
 
-# Konfigurasi nginx — gunakan /tmp untuk log dan pid
+# Konfigurasi nginx — semua path diarahkan ke /tmp
 RUN echo " \
 error_log /tmp/nginx/logs/error.log; \
 pid /tmp/nginx/run/nginx.pid; \
@@ -32,6 +32,9 @@ http { \
 \
     proxy_temp_path /tmp/nginx/proxy; \
     client_body_temp_path /tmp/nginx/client-body; \
+    fastcgi_temp_path /tmp/nginx/fastcgi; \
+    uwsgi_temp_path /tmp/nginx/uwsgi; \
+    scgi_temp_path /tmp/nginx/scgi; \
 \
     server { \
         listen 7860; \
@@ -47,11 +50,10 @@ http { \
 } \
 " > /etc/nginx/nginx.conf
 
-# Expose port (default Hugging Face Spaces)
 EXPOSE 7860
 
-# Jalankan sebagai non-root user (UID 1000 biasanya tersedia di HF Spaces)
+# Jalankan sebagai non-root user
 USER 1000
 
-# Jalankan nginx
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
