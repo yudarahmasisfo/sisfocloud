@@ -9,21 +9,11 @@ RUN apt-get update && \
     apt-get install -y nginx && \
     rm -rf /var/lib/apt/lists/*
 
-# Buat direktori sementara di /tmp — lengkap untuk semua fitur nginx
-RUN mkdir -p \
-    /tmp/nginx/logs \
-    /tmp/nginx/client-body \
-    /tmp/nginx/proxy \
-    /tmp/nginx/fastcgi \
-    /tmp/nginx/scgi \
-    /tmp/nginx/uwsgi
-
-# Salin file website kamu
+# Salin file website
 COPY . /app
 
-# Konfigurasi nginx — semua path diarahkan ke /tmp
+# Konfigurasi nginx — semua log & temp ke /tmp
 RUN echo " \
-# Log ke /tmp, bukan /var/log
 error_log /tmp/nginx/logs/error.log; \
 \
 events { \
@@ -36,7 +26,7 @@ http { \
     sendfile on; \
     keepalive_timeout 65; \
 \
-    # Semua temporary paths diarahkan ke /tmp
+    # Semua temp path ke /tmp
     client_body_temp_path /tmp/nginx/client-body; \
     proxy_temp_path      /tmp/nginx/proxy; \
     fastcgi_temp_path    /tmp/nginx/fastcgi; \
@@ -57,8 +47,15 @@ http { \
 } \
 " > /etc/nginx/nginx.conf
 
+# Buat script startup untuk buat folder & set permission
+RUN echo '#!/bin/bash \n\
+mkdir -p /tmp/nginx/logs /tmp/nginx/client-body /tmp/nginx/proxy /tmp/nginx/fastcgi /tmp/nginx/scgi /tmp/nginx/uwsgi \n\
+chmod -R 777 /tmp/nginx \n\
+exec nginx -g "daemon off;" \n\
+' > /startup.sh && chmod +x /startup.sh
+
 # Expose port
 EXPOSE 7860
 
-# Jalankan nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Jalankan script startup
+CMD ["/startup.sh"]
