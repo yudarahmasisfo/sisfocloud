@@ -47,8 +47,11 @@ http { \
 } \
 " > /etc/nginx/nginx.conf
 
-# Expose port
+# Expose port (default Hugging Face Spaces)
 EXPOSE 7860
+
+# Jalankan sebagai non-root user (UID 1000 biasanya tersedia di HF Spaces)
+USER 1000
 
 # Jalankan nginx
 CMD ["nginx", "-g", "daemon off;"]
